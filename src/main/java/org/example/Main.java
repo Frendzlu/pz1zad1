@@ -13,7 +13,8 @@ public class Main {
         try {
             Files.createDirectories(Paths.get("./hotels"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Could not create directories");
+            return;
         }
 
         ConsoleWrapper cw = new ConsoleWrapper();
@@ -27,17 +28,19 @@ public class Main {
             if (command.equalsIgnoreCase("exit")) {
                 break;
             }
-            matchCommand : {
-                for (Method c : commands) {
-                    if (command.equalsIgnoreCase(c.getName())) {
-                        try {
-                            c.invoke(null, cw, hotel);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            cw.print(1, "%s", e.getMessage());
-                        }
-                        break matchCommand;
+            boolean wasCommandFound = false;
+            for (Method c : commands) {
+                if (command.equalsIgnoreCase(c.getName())) {
+                    try {
+                        c.invoke(null, cw, hotel);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        cw.print(1, "%s", e.getMessage());
                     }
+                    wasCommandFound = true;
+                    break;
                 }
+            }
+            if (!wasCommandFound) {
                 cw.print(1, "No matching action for command with name '%s'", command);
             }
         }

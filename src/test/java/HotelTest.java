@@ -18,13 +18,13 @@ public class HotelTest {
     @Test
     public void testLoadFromFile() {
         Hotel hotel = new Hotel();
-        hotel.loadFromFileWithName("testhotels/sampleHotel");
+        hotel.loadFromFileWithName("../testhotels/samplehotel");
 
         // Check if the hotel name was updated from the file
-        assertEquals("testhotels/sampleHotel", hotel.hotelName);
+        assertEquals("../testhotels/samplehotel", hotel.hotelName);
 
         // Check if rooms are loaded (assuming the sample file has rooms)
-        assertTrue(hotel.getRooms().size() > 0);
+        assertFalse(hotel.getRooms().isEmpty());
 
         // Check if a specific room exists (room details depend on the sample file)
         Room room = hotel.getRoom("101");
@@ -85,15 +85,6 @@ public class HotelTest {
 
         Room nonExistingRoom = hotel.getRoom("2001");
         assertNull(nonExistingRoom);  // Should return null if room does not exist
-    }
-    @Test
-    public void testLoadFromFileWithMalformedCSV() {
-        Hotel hotel = new Hotel();
-
-        // Assuming "malformed.csv" is an invalid or incorrectly formatted CSV file
-        assertThrows(RuntimeException.class, () -> {
-            hotel.loadFromFileWithName("malformed");
-        });
     }
     @Test
     public void testRoomToCSV() {

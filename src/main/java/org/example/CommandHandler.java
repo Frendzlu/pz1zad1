@@ -1,7 +1,6 @@
 package org.example;
 
 import jdk.jfr.Description;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +16,10 @@ public class CommandHandler {
     public static String NO_ROOMS_MSG = "Hotel has no rooms";
     public static String CHOOSE_ROOM_MSG = "Choose a room: ";
     public static String NOT_FOUND_MSG = "Room not found";
+
+    private CommandHandler() {
+        throw new IllegalStateException("Utility class");
+    }
 
     @Description("Shows all available commands")
     public static void help(ConsoleWrapper csl, Hotel hotel) {
@@ -40,7 +43,7 @@ public class CommandHandler {
                 csl.print(1, "Overwriting existing data...");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            csl.print(1, "Error creating file");
         }
         hotel.saveToFile(new File("./hotels/"+hotel.hotelName+".csv"), "uuuu-MM-dd");
     }

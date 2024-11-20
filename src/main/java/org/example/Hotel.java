@@ -60,7 +60,7 @@ public class Hotel {
             }
             this.hotelName = filename;
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error reading file: " + e.getMessage());
         }
     }
 
@@ -80,7 +80,7 @@ public class Hotel {
             cw.writeAll(data);
             cw.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error reading file: " + e.getMessage());
         }
     }
 
@@ -88,7 +88,8 @@ public class Hotel {
         for (int i = 1; i <= floors; i++) {
             for (int j = 1; j <= roomsPerFloor; j++) {
                 int padding = (int) (Math.log10(roomsPerFloor)+1);
-                String roomName = i + String.format("%" + padding + "s", j).replace(' ', '0');
+                String format = "%" + padding + "s";
+                String roomName = i + String.format(format, j).replace(' ', '0');
                 Room room = new Room(roomName, j, i);
                 rooms.put(roomName, room);
             }

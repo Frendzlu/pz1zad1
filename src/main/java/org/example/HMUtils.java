@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class HMUtils {
+    private HMUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static ArrayList<File> listFilesForFolder(final File folder) {
         ArrayList<File> files = new ArrayList<>();
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
