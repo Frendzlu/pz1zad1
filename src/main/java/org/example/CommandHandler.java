@@ -11,7 +11,13 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+
+
 public class CommandHandler {
+    public static String NO_ROOMS_MSG = "Hotel has no rooms";
+    public static String CHOOSE_ROOM_MSG = "Choose a room: ";
+    public static String NOT_FOUND_MSG = "Room not found";
+
     @Description("Shows all available commands")
     public static void help(ConsoleWrapper csl, Hotel hotel) {
         csl.print(1, "Available commands:");
@@ -29,7 +35,10 @@ public class CommandHandler {
     public static void save(ConsoleWrapper csl, Hotel hotel) {
         File file = new File("./hotels/"+hotel.hotelName+".csv");
         try {
-            boolean _ = file.createNewFile();
+            boolean wasFileCreated = file.createNewFile();
+            if (wasFileCreated) {
+                csl.print(1, "Overwriting existing data...");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,7 +72,7 @@ public class CommandHandler {
     @Description("Shows hotel room prices")
     public static void prices(ConsoleWrapper csl, Hotel hotel) {
         if (hotel.getRooms() == null) {
-            csl.print(1, "Hotel has no rooms");
+            csl.print(1, NO_ROOMS_MSG);
             return;
         }
         for (Room room : hotel.getRooms()) {
@@ -74,13 +83,13 @@ public class CommandHandler {
     @Description("Shows description for selected room")
     public static void view(ConsoleWrapper csl, Hotel hotel) {
         if (hotel.getRooms() == null) {
-            csl.print(1, "Hotel has no rooms");
+            csl.print(1, NO_ROOMS_MSG);
             return;
         }
-        String roomName = csl.getString(1, "Choose a room: ");
+        String roomName = csl.getString(1, CHOOSE_ROOM_MSG);
         Room room = hotel.getRoom(roomName);
         if (room == null) {
-            csl.print(1, "Room not found");
+            csl.print(1, NOT_FOUND_MSG);
             return;
         }
         HMUtils.displayRoomInfo(room, csl, true, true);
@@ -89,13 +98,13 @@ public class CommandHandler {
     @Description("Checks in one or multiple guests")
     public static void checkin(ConsoleWrapper csl, Hotel hotel) {
         if (hotel.getRooms() == null) {
-            csl.print(1, "Hotel has no rooms");
+            csl.print(1, NO_ROOMS_MSG);
             return;
         }
-        String roomName = csl.getString(1, "Choose a room: ");
+        String roomName = csl.getString(1, CHOOSE_ROOM_MSG);
         Room room = hotel.getRoom(roomName);
         if (room == null) {
-            csl.print(1, "Room not found");
+            csl.print(1, NOT_FOUND_MSG);
             return;
         }
         int numberOfGuests = csl.getInt(1, "Number of guests: ");
@@ -117,13 +126,13 @@ public class CommandHandler {
     @Description("Checks out a guest")
     public static void checkout(ConsoleWrapper csl, Hotel hotel) {
         if (hotel.getRooms() == null) {
-            csl.print(1, "Hotel has no rooms");
+            csl.print(1, NO_ROOMS_MSG);
             return;
         }
-        String roomName = csl.getString(1, "Choose a room: ");
+        String roomName = csl.getString(1, CHOOSE_ROOM_MSG);
         Room room = hotel.getRoom(roomName);
         if (room == null) {
-            csl.print(1, "Room not found");
+            csl.print(1, NOT_FOUND_MSG);
             return;
         }
         if (room.getGuests().isEmpty()) {
@@ -151,7 +160,7 @@ public class CommandHandler {
     @Description("Returns the information about rooms and their guests")
     public static void list(ConsoleWrapper csl, Hotel hotel) {
         if (hotel.getRooms() == null) {
-            csl.print(1, "Hotel has no rooms");
+            csl.print(1, NO_ROOMS_MSG);
             return;
         }
         for (Room room : hotel.getRooms()) {
@@ -170,36 +179,20 @@ public class CommandHandler {
             int numberOfFloors = csl.getInt(1, "Number of floors: ");
             int roomsPerFloor = csl.getInt(1, "Number of rooms per floor: ");
             hotel.setRooms(numberOfFloors, roomsPerFloor);
-        } else if (x.equals("a")) {
+            return;
+        }
+        if (x.equals("a")) {
             hotel.hotelName = csl.getString(1, "Hotel name (currently: %s): ", hotel.hotelName);
             boolean  hasEnded = false;
             while (!hasEnded) {
                 int floor = csl.getInt(1, "Room floor: ");
-                String roomName = "";
-                boolean isRoomNumberValid = false;
-                while (!isRoomNumberValid) {
-                    roomName = csl.getString(1, "Room number (with the floor at the beginning): ").trim();
-                    isRoomNumberValid = Room.isValidRoomName(floor, roomName);
-                    if (!isRoomNumberValid) {
-                        csl.print(1, "This room number does not belong to this floor, please try again.");
-                    }
-                }
+                String roomName = HMUtils.getValidRoomName(csl, floor);
                 int capacity = csl.getInt(1, "Room capacity: ");
                 double price = csl.getDouble(1, "Room price: ");
                 String description = csl.getString(1, "Room description: ").trim();
                 int roomNumber = Integer.parseInt(roomName.replaceFirst(String.valueOf(floor), ""));
                 hotel.addRoom(new Room(roomName, description, price, floor, roomNumber, capacity));
-
-                boolean isNotValid = true;
-                while (isNotValid) {
-                    isNotValid = false;
-                    String y = csl.getString(1, "Do you want to add more rooms? (Y/n): ").toLowerCase();
-                    if (y.equals("n")) {
-                        hasEnded = true;
-                    } else if (!y.equals("y")) {
-                        isNotValid = true;
-                    }
-                }
+                hasEnded = HMUtils.shouldMoreRoomsBeCreated(csl);
             }
         }
     }

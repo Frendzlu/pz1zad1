@@ -37,4 +37,31 @@ public class HMUtils {
             csl.print(2, "%s", guest.toString());
         }
     }
+
+    public static String getValidRoomName(ConsoleWrapper csl, int floor) {
+        String roomName = "";
+        boolean isRoomNumberValid = false;
+        while (!isRoomNumberValid) {
+            roomName = csl.getString(1, "Room number (with the floor at the beginning): ").trim();
+            isRoomNumberValid = Room.isValidRoomName(floor, roomName);
+            if (!isRoomNumberValid) {
+                csl.print(1, "This room number does not belong to this floor, please try again.");
+            }
+        }
+        return roomName;
+    }
+
+    public static boolean shouldMoreRoomsBeCreated(ConsoleWrapper csl) {
+        boolean isNotValid = true;
+        while (isNotValid) {
+            isNotValid = false;
+            String y = csl.getString(1, "Do you want to add more rooms? (Y/n): ").toLowerCase();
+            if (y.equals("n")) {
+                return true;
+            } else if (!y.equals("y")) {
+                isNotValid = true;
+            }
+        }
+        return false;
+    }
 }
